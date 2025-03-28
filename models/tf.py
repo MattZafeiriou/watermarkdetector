@@ -522,7 +522,7 @@ class TFConcat(keras.layers.Layer):
 
 def parse_model(d, ch, model, imgsz):
     """Parses a model definition dict `d` to create YOLOv5 model layers, including dynamic channel adjustments."""
-    LOGGER.info(f"\n{'':>3}{'from':>18}{'n':>3}{'params':>10}  {'module':<40}{'arguments':<30}")
+    #LOGGER.info(f"\n{'':>3}{'from':>18}{'n':>3}{'params':>10}  {'module':<40}{'arguments':<30}")
     anchors, nc, gd, gw, ch_mul = (
         d["anchors"],
         d["nc"],
@@ -593,7 +593,7 @@ def parse_model(d, ch, model, imgsz):
         t = str(m)[8:-2].replace("__main__.", "")  # module type
         np = sum(x.numel() for x in torch_m_.parameters())  # number params
         m_.i, m_.f, m_.type, m_.np = i, f, t, np  # attach index, 'from' index, type, number params
-        LOGGER.info(f"{i:>3}{str(f):>18}{str(n):>3}{np:>10}  {t:<40}{str(args):<30}")  # print
+        #LOGGER.info(f"{i:>3}{str(f):>18}{str(n):>3}{np:>10}  {t:<40}{str(args):<30}")  # print
         save.extend(x % i for x in ([f] if isinstance(f, int) else f) if x != -1)  # append to savelist
         layers.append(m_)
         ch.append(c2)
@@ -619,7 +619,7 @@ class TFModel:
 
         # Define model
         if nc and nc != self.yaml["nc"]:
-            LOGGER.info(f"Overriding {cfg} nc={self.yaml['nc']} with nc={nc}")
+            #LOGGER.info(f"Overriding {cfg} nc={self.yaml['nc']} with nc={nc}")
             self.yaml["nc"] = nc  # override yaml value
         self.model, self.savelist = parse_model(deepcopy(self.yaml), ch=[ch], model=model, imgsz=imgsz)
 
@@ -769,7 +769,7 @@ def run(
     keras_model = keras.Model(inputs=im, outputs=tf_model.predict(im))
     keras_model.summary()
 
-    LOGGER.info("PyTorch, TensorFlow and Keras models successfully verified.\nUse export.py for TF model export.")
+    #LOGGER.info("PyTorch, TensorFlow and Keras models successfully verified.\nUse export.py for TF model export.")
 
 
 def parse_opt():

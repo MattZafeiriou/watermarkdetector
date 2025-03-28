@@ -295,6 +295,7 @@ def fuse_conv_and_bn(conv, bn):
 
 
 def model_info(model, verbose=False, imgsz=640):
+    return
     """
     Prints model summary including layers, parameters, gradients, and FLOPs; imgsz may be int or list.
 
