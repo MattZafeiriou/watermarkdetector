@@ -31,6 +31,7 @@ Usage - formats:
 import argparse
 import csv
 import os
+import platform
 import sys
 from pathlib import Path
 
@@ -42,17 +43,25 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
+from ultralytics.utils.plotting import Annotator, colors, save_one_box
+
 from models.common import DetectMultiBackend
 from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadScreenshots, LoadStreams
 from utils.general import (
+    LOGGER,
     Profile,
     check_file,
     check_img_size,
     check_imshow,
     check_requirements,
+    colorstr,
+    cv2,
     increment_path,
     non_max_suppression,
     print_args,
+    scale_boxes,
+    strip_optimizer,
+    xyxy2xywh,
 )
 from utils.torch_utils import select_device, smart_inference_mode
 
@@ -218,6 +227,9 @@ def run(
                 writer.writerow(data)
 
         # Process predictions
+        area = im.shape[2] * im.shape[3]
+        #print("Area of the image is: ", area)
+        hasWatermark = False
         for i, det in enumerate(pred):  # per image
             seen += 1
             if webcam:  # batch_size >= 1
@@ -228,12 +240,19 @@ def run(
 
             p = Path(p)  # to Path
             s += "{:g}x{:g} ".format(*im.shape[2:])  # print string
-
             if len(det):
-                print("True")
-            else:
-                print("False")
+                # Rescale boxes from img_size to im0 size
+                det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
 
+                for *xyxy, conf, cls in reversed(det):
+                    accuracy_score = conf.item()
+                    width = xyxy[2] - xyxy[0]
+                    height = xyxy[3] - xyxy[1]
+                    percentage = (width * height) / area * 100
+                    if (percentage > 5) and (accuracy_score > 0.8):
+                        hasWatermark = True
+                        break
+        print(hasWatermark)
 def parse_opt():
     """
     Parse command-line arguments for YOLOv5 detection, allowing custom inference options and model configurations.
